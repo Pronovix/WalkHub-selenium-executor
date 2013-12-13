@@ -23,10 +23,10 @@ class Connection {
   /**
    * Gets the PHPUnit output for a walkthrough or a walkthrough set.
    *
-   * @param $type
+   * @param $type string
    *   Entity type to render.
    *   "walkthrough" or "walkthrough_set"
-   * @param $uuid
+   * @param $uuid string
    *   Universally unique ID.
    *
    * @return string
@@ -46,7 +46,7 @@ class Connection {
   }
 
   /**
-   * @param mixed $authenticator
+   * @param Authenticator\WalkthroughAuthenticator $authenticator
    */
   public function setAuthenticator(\Walkthrough\Authenticator\WalkthroughAuthenticator $authenticator) {
     $this->authenticator = $authenticator;
