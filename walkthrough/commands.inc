@@ -42,6 +42,11 @@ function command__process_queue($connection, $command_line) {
 
     // Query queue.
     $queue = $connection->getScreeningQueue();
+    if (empty($queue)) {
+      echo "Queue is empty.\n";
+      exit();
+    }
+
     $walkthrough_to_play = array_pop($queue);
 
     // Get phpunit output.
