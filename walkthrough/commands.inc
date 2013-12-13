@@ -53,6 +53,7 @@ function command__process_queue($connection, $command_line) {
 
     // Execute phpunit.
     system("phpunit $phpunit_file");
+    unlink($phpunit_file);
 
     // Post results back.
 
