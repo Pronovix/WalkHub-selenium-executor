@@ -2,6 +2,7 @@
 require 'vendor/autoload.php';
 include_once 'walkthrough/connection.inc';
 include_once 'walkthrough/authenticator/basic.inc';
+include_once 'walkthrough/commands.inc';
 
 $command_line = new Commando\Command();
 
@@ -30,7 +31,11 @@ $command_line->argument()
     Get the screenshot queue.
 
   * get_phpunit [uuid]
-    Get the pphunit export for a walkthrough.');
+    Get the pphunit export for a walkthrough.
+
+  * process_queue
+    Gets the first item of the queue and executes the phpunit test, when ready
+    posts back the results and the screenshots to the screening.');
 
 $command_line->option('debug')
   ->aka('d')
@@ -53,41 +58,6 @@ if (function_exists($function_name)) {
 
   call_user_func($function_name, $connection, $command_line);
 }
-
-function command__status($connection, $command_line) {
-  try {
-    $connection->login();
-  } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
-    echo format_error($e->getResponse());
-    exit(1);
-  }
-
-  echo "Ok.\n";
-}
-
-function command__get_queue($connection, $command_line) {
-  try {
-    $connection->login();
-    $response = $connection->getScreeningQueue();
-  } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
-    echo format_error($e->getResponse());
-    exit(1);
-  }
-  var_dump($response);
-}
-
-function command__get_phpunit($connection, $command_line) {
-  try {
-    $connection->login();
-    $response = $connection->getPhpunit($command_line[1]);
-  } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
-    echo format_error($e->getResponse());
-    exit(1);
-  }
-
-  echo $response;
-}
-
 
 function format_error(Guzzle\Http\Message\Response $response) {
   return 'Error: [' . $response->getStatusCode() . '] ' . $response->getReasonPhrase() . "\n";
