@@ -1,5 +1,7 @@
 <?php
 require 'vendor/autoload.php';
+include_once 'walkthrough/connection.inc';
+include_once 'walkthrough/authenticator/basic.inc';
 
 $command_line = new Commando\Command();
 
@@ -35,53 +37,58 @@ $command_line->option('debug')
   ->describedAs('Debug mode')
   ->boolean();
 
-function command__status($command_line) {
-  $endpoint = _get_endpoint($command_line);
+$function_name = 'command__' . $command_line[0];
+if (function_exists($function_name)) {
+  $endpoint = $command_line['walkhub_url'] . '/api/v2';
+  $connection = new Walkthrough\Connection();
+  $connection->setEndpoint($endpoint);
 
+  // Basic http authentication.
+  $authenticator = new Walkthrough\Authenticator\Basic();
+  $authenticator->setUsername($command_line['username']);
+  $authenticator->setPassword($command_line['password']);
+  $authenticator->setEndpoint($endpoint);
+
+  $connection->setAuthenticator($authenticator);
+
+  call_user_func($function_name, $connection, $command_line);
+}
+
+function command__status($connection, $command_line) {
   try {
-    $user = login($endpoint, $command_line['username'], $command_line['password']);
+    $connection->login();
   } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
-    $response = $e->getResponse();
-    echo 'Error: [' . $response->getStatusCode() . '] ' . $response->getReasonPhrase() . "\n";
+    echo format_error($e->getResponse());
     exit(1);
   }
 
   echo "Ok.\n";
 }
 
-function command__get_queue($command_line) {
-  $endpoint = _get_endpoint($command_line);
-
-  //$user = login($endpoint, $command_line['username'], $command_line['password']);
-  $client = new Guzzle\Http\Client($endpoint);
-  $response = $client->get('walkhub-walkthrough-screening-queue')->send()->json();
+function command__get_queue($connection, $command_line) {
+  try {
+    $connection->login();
+    $response = $connection->getScreeningQueue();
+  } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
+    echo format_error($e->getResponse());
+    exit(1);
+  }
   var_dump($response);
 }
 
-function command__get_phpunit($command_line) {
-  $endpoint = _get_endpoint($command_line);
+function command__get_phpunit($connection, $command_line) {
+  try {
+    $connection->login();
+    $response = $connection->getPhpunit($command_line[1]);
+  } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
+    echo format_error($e->getResponse());
+    exit(1);
+  }
 
-  $client = new Guzzle\Http\Client($endpoint);
-  $response = $client->get('walkthrough-phpunit/' . $command_line[1])->send()->json();
-  echo $response[0];
+  echo $response;
 }
 
-function _get_endpoint($command_line) {
-  return $command_line['walkhub_url'] . '/api/v2/';
-}
 
-function login($endpoint, $username, $password) {
-  $client = new Guzzle\Http\Client($endpoint);
-
-  $response = $client->post('user/login', null, array(
-    'username' => $username,
-    'password' => $password
-  ))->send()->json();
-
-  return $response;
-}
-
-$function_name = 'command__' . $command_line[0];
-if (function_exists($function_name)) {
-  call_user_func($function_name, $command_line);
+function format_error(Guzzle\Http\Message\Response $response) {
+  return 'Error: [' . $response->getStatusCode() . '] ' . $response->getReasonPhrase() . "\n";
 }
