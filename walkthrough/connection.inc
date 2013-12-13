@@ -20,10 +20,28 @@ class Connection {
     return $client->get('walkhub-walkthrough-screening-queue')->send()->json();
   }
 
-  public function getPhpunit($uuid) {
+  /**
+   * Gets the PHPUnit output for a walkthrough or a walkthrough set.
+   *
+   * @param $type
+   *   Entity type to render.
+   *   "walkthrough" or "walkthrough_set"
+   * @param $uuid
+   *   Universally unique ID.
+   *
+   * @return string
+   *   PHPUnit script.
+   */
+  public function getPhpunit($type, $uuid) {
     $client = $this->getClient();
 
-    $response = $client->get('walkthrough-phpunit/' . $uuid)->send()->json();
+    if ($type == 'walkthrough') {
+      $response = $client->get('walkthrough-phpunit/' . $uuid)->send()->json();
+    }
+    else {
+      $response = $client->get('walkthrough-set-phpunit/' . $uuid)->send()->json();
+    }
+
     return $response[0];
   }
 
