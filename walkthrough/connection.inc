@@ -48,7 +48,7 @@ class Connection {
   /**
    * @param mixed $authenticator
    */
-  public function setAuthenticator($authenticator) {
+  public function setAuthenticator(\Walkthrough\Authenticator\WalkthroughAuthenticator $authenticator) {
     $this->authenticator = $authenticator;
   }
 
