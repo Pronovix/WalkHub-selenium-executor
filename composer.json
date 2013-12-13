@@ -2,8 +2,8 @@
     "name": "pronovix/walkthrough_selenium_executor",
     "description": "Jenkins tasks and helper scripts to retrieve and play Walkthroughs via Selenium.",
     "require": {
-        "guzzle/guzzle": "3.8.0",
-        "nategood/commando": "0.2.3"
+        "guzzle/guzzle": "*",
+        "nategood/commando": "*"
     },
     "authors": [
         {
