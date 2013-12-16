@@ -35,7 +35,7 @@ $command_line->argument()
   * get_queue
     Get the screenshot queue.
 
-  * get_phpunit [uuid]
+  * get_phpunit [walkthrough|walkthrough_set] [uuid]
     Get the phpunit export for a walkthrough.
 
   * process_queue
