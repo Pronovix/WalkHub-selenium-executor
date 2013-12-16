@@ -66,13 +66,13 @@ if (function_exists($function_name)) {
   }
 
   // OAuth authentication.
-  if ($command_line['consumer_key'] && $command_line['consumer_secret']) {
+  if ($command_line['consumer key'] && $command_line['consumer secret']) {
     $authenticator = new \Walkthrough\Authenticator\Oauth();
-    $authenticator->setConsumerKey($command_line['consumer_key']);
-    $authenticator->setConsumerSecret($command_line['consumer_secret']);
-    $authenticator->setEndpoint($endpoint);
+    $authenticator->setConsumerKey($command_line['consumer key']);
+    $authenticator->setConsumerSecret($command_line['consumer secret']);
 
     $endpoint .= '/oauth';
+    $authenticator->setEndpoint($endpoint);
     $connection->setEndpoint($endpoint);
   }
 

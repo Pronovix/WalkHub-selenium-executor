@@ -24,7 +24,7 @@ class Oauth extends WalkthroughAuthenticator {
 
     $client->addSubscriber($oauth);
 
-    // Get token
+    // Get token.
     $response = $client->post($this->endpoint . '/user/token')->send()->json();
     $token = $response['token'];
 
