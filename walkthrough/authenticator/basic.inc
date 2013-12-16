@@ -2,7 +2,6 @@
 
 namespace Walkthrough\Authenticator;
 use Walkthrough\Authenticator;
-use Guzzle\Http\Client;
 
 include_once 'abstract.inc';
 
@@ -11,7 +10,7 @@ class Basic extends WalkthroughAuthenticator {
   protected $password;
 
   public function login() {
-    $client = new Client($this->endpoint);
+    $client = $this->getClient();
     $response = $client->post('user/login', null, array(
       'username' => $this->username,
       'password' => $this->password,
@@ -49,6 +48,4 @@ class Basic extends WalkthroughAuthenticator {
   public function getUsername() {
     return $this->username;
   }
-
-  protected $drupalUser;
 }

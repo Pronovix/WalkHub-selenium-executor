@@ -1,15 +1,44 @@
 <?php
 
 namespace Walkthrough\Authenticator;
+use Guzzle\Http\Client;
 
 abstract class WalkthroughAuthenticator {
   protected $endpoint;
-  abstract public function login();
+  protected $drupalUser;
 
   /**
-   * @param mixed $endpoint
+   * @param string $endpoint
    */
   public function setEndpoint($endpoint) {
     $this->endpoint = $endpoint;
   }
+
+  /**
+   * @return \stdClass
+   * Logged in Drupal user objetct.
+   */
+  abstract public function login();
+
+  /**
+   * Prepare the Guzzle http client.
+   *
+   * Also populates the cookies if the authentication was successful.
+   *
+   * @return Guzzle\Http\Client
+   */
+  public function getClient() {
+    if ($this->drupalUser['user']['uid'] == 0) {
+      return new Client($this->endpoint);
+    }
+
+    $client = new Client($this->endpoint, array(
+      'request.options' => array(
+        'cookies' => array($this->drupalUser['session_name'] => $this->drupalUser['sessid']),
+      ),
+    ));
+
+    return $client;
+  }
+
 }

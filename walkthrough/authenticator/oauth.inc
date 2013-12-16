@@ -2,7 +2,6 @@
 
 namespace Walkthrough\Authenticator;
 use Walkthrough\Authenticator;
-use Guzzle\Http\Client;
 use Guzzle\Plugin\Oauth\OauthPlugin;
 
 include_once 'abstract.inc';
@@ -12,17 +11,10 @@ class Oauth extends WalkthroughAuthenticator {
   protected $consumerSecret;
 
   /**
-   * @return array
+   *
    */
   public function login() {
-    $client = new Client($this->endpoint);
-
-    $oauth = new OauthPlugin(array(
-      'consumer_key'    => $this->getConsumerKey(),
-      'consumer_secret' => $this->getConsumerSecret(),
-    ));
-
-    $client->addSubscriber($oauth);
+    $client = $this->getClient();
 
     // Get token.
     $response = $client->post($this->endpoint . '/user/token')->send()->json();
@@ -32,6 +24,8 @@ class Oauth extends WalkthroughAuthenticator {
     $response = $client->post($this->endpoint . '/system/connect', array(), array('token' => $token))
       ->send()
       ->json();
+
+    $this->drupalUser = $response;
 
     return $response;
   }
@@ -64,4 +58,23 @@ class Oauth extends WalkthroughAuthenticator {
     return $this->consumerSecret;
   }
 
+  /**
+   * Prepare the Guzzle http client.
+   *
+   * Also populates the cookies if the authentication was successful.
+   *
+   * @return Guzzle\Http\Client
+   */
+  public function getClient() {
+    $client = parent::getClient();
+
+    $oauth = new OauthPlugin(array(
+      'consumer_key'    => $this->getConsumerKey(),
+      'consumer_secret' => $this->getConsumerSecret(),
+    ));
+
+    $client->addSubscriber($oauth);
+
+    return $client;
+  }
 }

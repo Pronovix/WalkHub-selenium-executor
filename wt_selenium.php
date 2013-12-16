@@ -1,8 +1,6 @@
 <?php
 require 'vendor/autoload.php';
 include_once 'walkthrough/connection.inc';
-include_once 'walkthrough/authenticator/basic.inc';
-include_once 'walkthrough/authenticator/oauth.inc';
 include_once 'walkthrough/commands.inc';
 
 $command_line = new Commando\Command();
@@ -58,6 +56,7 @@ if (function_exists($function_name)) {
 
   // Basic HTTP authentication.
   if ($command_line['username'] && $command_line['password']) {
+    include_once 'walkthrough/authenticator/basic.inc';
     $authenticator = new Walkthrough\Authenticator\Basic();
     $authenticator->setUsername($command_line['username']);
     $authenticator->setPassword($command_line['password']);
@@ -67,6 +66,7 @@ if (function_exists($function_name)) {
 
   // OAuth authentication.
   if ($command_line['consumer key'] && $command_line['consumer secret']) {
+    include_once 'walkthrough/authenticator/oauth.inc';
     $authenticator = new \Walkthrough\Authenticator\Oauth();
     $authenticator->setConsumerKey($command_line['consumer key']);
     $authenticator->setConsumerSecret($command_line['consumer secret']);
