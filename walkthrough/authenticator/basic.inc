@@ -6,10 +6,9 @@ use Guzzle\Http\Client;
 
 include_once 'abstract.inc';
 
-class Basic implements WalkthroughAuthenticator {
+class Basic extends WalkthroughAuthenticator {
   protected $username;
   protected $password;
-  protected $endpoint;
 
   public function login() {
     $client = new Client($this->endpoint);
@@ -51,11 +50,5 @@ class Basic implements WalkthroughAuthenticator {
     return $this->username;
   }
 
-  /**
-   * @param mixed $endpoint
-   */
-  public function setEndpoint($endpoint) {
-    $this->endpoint = $endpoint;
-  }
   protected $drupalUser;
 }

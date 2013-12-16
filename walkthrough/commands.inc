@@ -2,13 +2,18 @@
 
 function command__status($connection, $command_line) {
   try {
-    $connection->login();
+    $user = $connection->login();
   } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
     echo format_error($e->getResponse());
     exit(1);
   }
 
   echo "Ok.\n";
+
+  if ($command_line['debug']) {
+    echo "User:\n";
+    var_dump($user);
+  }
 }
 
 function command__get_queue($connection, $command_line) {

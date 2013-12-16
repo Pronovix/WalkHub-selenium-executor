@@ -2,6 +2,14 @@
 
 namespace Walkthrough\Authenticator;
 
-interface WalkthroughAuthenticator {
-  public function login();
+abstract class WalkthroughAuthenticator {
+  protected $endpoint;
+  abstract public function login();
+
+  /**
+   * @param mixed $endpoint
+   */
+  public function setEndpoint($endpoint) {
+    $this->endpoint = $endpoint;
+  }
 }
