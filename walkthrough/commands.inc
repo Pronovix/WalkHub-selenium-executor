@@ -22,8 +22,9 @@ function command__get_queue(\Walkthrough\Connection $connection, $command_line) 
     $response = $connection->getScreeningQueue();
   } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
     echo format_error($e->getResponse());
-    exit(1);
+    exit($e->getResponse()->getStatusCode());
   }
+
   var_dump($response);
 }
 
@@ -33,7 +34,7 @@ function command__get_phpunit(\Walkthrough\Connection $connection, $command_line
     $response = $connection->getPhpunit($command_line[1], $command_line[2]);
   } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
     echo format_error($e->getResponse());
-    exit(1);
+    exit($e->getResponse()->getStatusCode());
   }
 
   echo $response;
@@ -71,7 +72,7 @@ function command__process_queue(\Walkthrough\Connection $connection, $command_li
 
   } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
     echo format_error($e->getResponse());
-    exit(1);
+    exit($e->getResponse()->getStatusCode());
   }
 }
 
