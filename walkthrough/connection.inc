@@ -1,6 +1,5 @@
 <?php
 namespace Walkthrough;
-use Guzzle\Http\Client;
 
 class Connection {
   /**
@@ -57,7 +56,7 @@ class Connection {
   }
 
   /**
-   * @param Authenticator\WalkthroughAuthenticator $authenticator
+   * @param \Walkthrough\Authenticator\WalkthroughAuthenticator $authenticator
    */
   public function setAuthenticator(\Walkthrough\Authenticator\WalkthroughAuthenticator $authenticator) {
     $this->authenticator = $authenticator;

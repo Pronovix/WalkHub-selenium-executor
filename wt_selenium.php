@@ -36,7 +36,7 @@ $command_line->argument()
     Get the screenshot queue.
 
   * get_phpunit [uuid]
-    Get the pphunit export for a walkthrough.
+    Get the phpunit export for a walkthrough.
 
   * process_queue
     Gets the first item of the queue and executes the phpunit test, when ready
@@ -60,6 +60,7 @@ if (function_exists($function_name)) {
     $authenticator = new Walkthrough\Authenticator\Basic();
     $authenticator->setUsername($command_line['username']);
     $authenticator->setPassword($command_line['password']);
+
     $authenticator->setEndpoint($endpoint);
     $connection->setEndpoint($endpoint);
   }
@@ -86,6 +87,3 @@ if (function_exists($function_name)) {
   call_user_func($function_name, $connection, $command_line);
 }
 
-function format_error(Guzzle\Http\Message\Response $response) {
-  return 'Error: [' . $response->getStatusCode() . '] ' . $response->getReasonPhrase() . "\n";
-}

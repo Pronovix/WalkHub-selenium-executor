@@ -1,6 +1,6 @@
 <?php
 
-function command__status($connection, $command_line) {
+function command__status(\Walkthrough\Connection $connection, $command_line) {
   try {
     $user = $connection->login();
   } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
@@ -8,15 +8,15 @@ function command__status($connection, $command_line) {
     exit(1);
   }
 
-  echo "Ok.\n";
-
   if ($command_line['debug']) {
     echo "User:\n";
     var_dump($user);
   }
+
+  echo "Ok.\n";
 }
 
-function command__get_queue($connection, $command_line) {
+function command__get_queue(\Walkthrough\Connection $connection, $command_line) {
   try {
     $connection->login();
     $response = $connection->getScreeningQueue();
@@ -27,7 +27,7 @@ function command__get_queue($connection, $command_line) {
   var_dump($response);
 }
 
-function command__get_phpunit($connection, $command_line) {
+function command__get_phpunit(\Walkthrough\Connection $connection, $command_line) {
   try {
     $connection->login();
     $response = $connection->getPhpunit($command_line[1], $command_line[2]);
@@ -39,7 +39,7 @@ function command__get_phpunit($connection, $command_line) {
   echo $response;
 }
 
-function command__process_queue($connection, $command_line) {
+function command__process_queue(\Walkthrough\Connection $connection, $command_line) {
   try {
     $connection->login();
 
@@ -73,4 +73,14 @@ function command__process_queue($connection, $command_line) {
     echo format_error($e->getResponse());
     exit(1);
   }
+}
+
+/**
+ * Formats a Guzzle error response to the command line.
+ *
+ * @param \Guzzle\Http\Message\Response $response
+ * @return string
+ */
+function format_error(Guzzle\Http\Message\Response $response) {
+  return 'Error: [' . $response->getStatusCode() . '] ' . $response->getReasonPhrase() . "\n";
 }

@@ -15,8 +15,10 @@ abstract class WalkthroughAuthenticator {
   }
 
   /**
+   * Log in to Drupal.
+   *
    * @return \stdClass
-   * Logged in Drupal user objetct.
+   * Logged in Drupal user object.
    */
   abstract public function login();
 
@@ -25,7 +27,7 @@ abstract class WalkthroughAuthenticator {
    *
    * Also populates the cookies if the authentication was successful.
    *
-   * @return Guzzle\Http\Client
+   * @return \Guzzle\Http\Client
    */
   public function getClient() {
     if ($this->drupalUser['user']['uid'] == 0) {

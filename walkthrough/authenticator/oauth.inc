@@ -11,7 +11,7 @@ class Oauth extends WalkthroughAuthenticator {
   protected $consumerSecret;
 
   /**
-   *
+   * Logs in via 2 legged OpenAuth.
    */
   public function login() {
     $client = $this->getClient();
@@ -63,7 +63,7 @@ class Oauth extends WalkthroughAuthenticator {
    *
    * Also populates the cookies if the authentication was successful.
    *
-   * @return Guzzle\Http\Client
+   * @return \Guzzle\Http\Client
    */
   public function getClient() {
     $client = parent::getClient();
