@@ -4,26 +4,27 @@ namespace Walkthrough\Authenticator;
 use Walkthrough\Authenticator;
 
 
-class NotAuthenticatedException extends \Exception {};
 
 class AuthenticatorFactory {
 
   /**
    * Factory for creating an Authenticator object.
    *
-   * @param $settings array
+   * @param $settings \ArrayAccess
    *   Settings array to build the authenticator from. Probably set via
    *   Commando.
+   *   Must include Walkhub path via "walkhub_url".
    *
-   *   If "username" and "password" present, it creates a Basic HTTP
-   *   authentication object.
-   *
-   *   If "consumer secret" and "consumer key" present, it creates an Oauth
-   *   authentication.
-   *
-   *   If neither is present it creates an Anonymous authenticator object.
+   *   Authentication set by the following rules:
+   *   - If "username" and "password" present, it creates a Basic HTTP
+   *     authentication object.
+   *   - If "consumer secret" and "consumer key" present, it creates an Oauth
+   *     authentication.
+   *   - If neither is present it creates an Anonymous authenticator object.
    *
    * @return WalkthroughAuthenticator
+   *
+   * @throws NotAuthenticatedException
    */
   public static function create(\ArrayAccess $settings) {
     $endpoint = $settings['walkhub_url'] . '/api/v2';

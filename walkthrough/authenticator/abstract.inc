@@ -3,8 +3,28 @@
 namespace Walkthrough\Authenticator;
 use Guzzle\Http\Client;
 
+/**
+ * Class NotAuthenticatedException
+ * @package Walkthrough\Authenticator
+ */
+class NotAuthenticatedException extends \Exception {};
+
+/**
+ * Class WalkthroughAuthenticator
+ * @package Walkthrough\Authenticator
+ */
 abstract class WalkthroughAuthenticator {
+  /**
+   * @var string
+   * Walkthrough services endpoint.
+   */
   protected $endpoint;
+
+  /**
+   * @var array
+   * Drupal user.
+   * As returned from system.connect resource.
+   */
   protected $drupalUser;
 
   /**

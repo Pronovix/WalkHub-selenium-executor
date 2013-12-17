@@ -28,7 +28,7 @@ class Oauth extends WalkthroughAuthenticator {
     $this->drupalUser = $response;
 
     if ($this->drupalUser['user']['uid'] == 0) {
-      throw new \Exception('Unauthenticated');
+      throw new NotAuthenticatedException();
     }
 
     return $response;
