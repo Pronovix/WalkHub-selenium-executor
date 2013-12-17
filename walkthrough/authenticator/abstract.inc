@@ -8,6 +8,14 @@ abstract class WalkthroughAuthenticator {
   protected $drupalUser;
 
   /**
+   * Log in to Drupal.
+   *
+   * @return \stdClass
+   * Logged in Drupal user object.
+   */
+  abstract public function login();
+
+  /**
    * @param string $endpoint
    */
   public function setEndpoint($endpoint) {
@@ -15,12 +23,11 @@ abstract class WalkthroughAuthenticator {
   }
 
   /**
-   * Log in to Drupal.
-   *
-   * @return \stdClass
-   * Logged in Drupal user object.
+   * @return string
    */
-  abstract public function login();
+  public function getEndpoint() {
+    return $this->endpoint;
+  }
 
   /**
    * Prepare the Guzzle http client.

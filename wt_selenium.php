@@ -1,9 +1,16 @@
 <?php
+
+namespace Walkthrough;
+
+use Walkthrough\Authenticator\NotAuthenticatedException;
+
 require 'vendor/autoload.php';
 include_once 'walkthrough/connection.inc';
 include_once 'walkthrough/commands.inc';
+include_once 'walkthrough/authenticator/factory.inc';
 
-$command_line = new Commando\Command();
+
+$command_line = new \Commando\Command();
 
 $command_line->option('username')
   ->aka('u')
@@ -52,47 +59,28 @@ $command_line->option('debug')
 
 $function_name = 'command__' . $command_line[0];
 if (function_exists($function_name)) {
-  $endpoint = $command_line['walkhub_url'] . '/api/v2';
-  $connection = new Walkthrough\Connection();
+  $connection = new Connection();
 
-  $authenticator = NULL;
+  try {
+    $authenticator = Authenticator\AuthenticatorFactory::create($command_line);
+  } catch (NotAuthenticatedException $e) {
+    $warning_message = "Warning: Authentication not set, using anonymous session (most endpoints will not work).\n";
+    $warning_message .= "  Use the -u and -p flags for basic HTTP authentication.\n";
+    $warning_message .="  Use the -k and -s flags for 2-legged OAuth authentication.\n\n";
+    echo $warning_message;
 
-  // Basic HTTP authentication.
-  if ($command_line['username'] && $command_line['password']) {
-    include_once 'walkthrough/authenticator/basic.inc';
-    $authenticator = new Walkthrough\Authenticator\Basic();
-    $authenticator->setUsername($command_line['username']);
-    $authenticator->setPassword($command_line['password']);
-  }
-
-  // OAuth authentication.
-  if ($command_line['consumer key'] && $command_line['consumer secret']) {
-    include_once 'walkthrough/authenticator/oauth.inc';
-    $authenticator = new \Walkthrough\Authenticator\Oauth();
-    $authenticator->setConsumerKey($command_line['consumer key']);
-    $authenticator->setConsumerSecret($command_line['consumer secret']);
-
-    $endpoint .= '/oauth';
-  }
-
-  // If we don't have authentication we fall back to Anonymous session.
-  if ($authenticator === NULL) {
-    echo "Warning: Authentication not set, using anonymous session (most endpoints will not work).\n";
-    echo "  Use the -u and -p flags for basic HTTP authentication.\n";
-    echo "  Use the -k and -s flags for 2-legged OAuth authentication.\n\n";
-
+    // We let it continue, good for testing if we can reach endpoints
+    // unauthenticated (We shouldn't...).
     include_once 'walkthrough/authenticator/anonymous.inc';
     $authenticator = new \Walkthrough\Authenticator\Anonymous();
+    $authenticator->setEndpoint($command_line['walkhub_url'] . '/api/v2');
   }
-
   $connection->setAuthenticator($authenticator);
+  $connection->setEndpoint($authenticator->getEndpoint());
 
   if ($command_line['debug']) {
-    echo "Endpoint set to: $endpoint\n";
+    echo "Endpoint set to: " . $authenticator->getEndpoint() . "\n";
   }
-  $authenticator->setEndpoint($endpoint);
-  $connection->setEndpoint($endpoint);
 
   call_user_func($function_name, $connection, $command_line);
 }
-
