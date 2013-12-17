@@ -44,16 +44,18 @@ function command__process_queue(\Walkthrough\Connection $connection, $command_li
   try {
     $connection->login();
 
-    // Set flag for processing.
-
     // Query queue.
     $queue = $connection->getScreeningQueue();
     if (empty($queue)) {
       echo "Queue is empty.\n";
       exit();
     }
-
     $walkthrough_to_play = array_pop($queue);
+
+    // Create empty screening.
+
+    // Remove screening flag.
+    $connection->updateScreeningFlag($walkthrough_to_play['uuid'], FALSE);
 
     // Get phpunit output.
     $response = $connection->getPhpunit($walkthrough_to_play['type'], $walkthrough_to_play['uuid']);
@@ -68,12 +70,18 @@ function command__process_queue(\Walkthrough\Connection $connection, $command_li
 
     // Post results back.
 
-    // Set flag that it's ready.
-
   } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
     echo format_error($e->getResponse());
     exit($e->getResponse()->getStatusCode());
   }
+}
+
+function command__flag(\Walkthrough\Connection $connection, $command_line) {
+  $uuid = $command_line[1];
+  $flag = $command_line[2];
+
+  $connection->login();
+  $connection->updateScreeningFlag($uuid, $flag);
 }
 
 /**

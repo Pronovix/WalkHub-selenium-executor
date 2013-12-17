@@ -40,7 +40,10 @@ $command_line->argument()
 
   * process_queue
     Gets the first item of the queue and executes the phpunit test, when ready
-    posts back the results and the screenshots to the screening.');
+    posts back the results and the screenshots to the screening.
+
+  * flag [uuid] [0|1]
+    Flags/unflags a Walkthrough or Walkthrough set.');
 
 $command_line->option('debug')
   ->aka('d')

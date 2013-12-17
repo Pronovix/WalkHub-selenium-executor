@@ -56,6 +56,26 @@ class Connection {
   }
 
   /**
+   * Update a screening flag for a Walkthrough or Walkthrough set.
+   *
+   * @param string $uuid
+   * @param bool $flag_value
+   */
+  public function updateScreeningFlag($uuid, $flag_value) {
+    $client = $this->authenticator->getClient();
+
+    $response = $client->post($this->endpoint . '/user/token')->send()->json();
+    $token = $response['token'];
+
+    $response = $client->put('walkthrough-screening-flag/'. $uuid,
+      array('X-CSRF-TOKEN' => $token),
+      array('flag' => $flag_value)
+    )->send()->json();
+
+    return $response;
+  }
+
+  /**
    * @param \Walkthrough\Authenticator\WalkthroughAuthenticator $authenticator
    */
   public function setAuthenticator(\Walkthrough\Authenticator\WalkthroughAuthenticator $authenticator) {
