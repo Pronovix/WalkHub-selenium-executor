@@ -1,12 +1,7 @@
 <?php
 
 function command__status(\Walkthrough\Connection $connection, $command_line) {
-  try {
-    $user = $connection->login();
-  } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
-    echo format_error($e->getResponse());
-    exit(1);
-  }
+  $user = $connection->login();
 
   if ($command_line['debug']) {
     echo "User:\n";
@@ -17,76 +12,55 @@ function command__status(\Walkthrough\Connection $connection, $command_line) {
 }
 
 function command__get_queue(\Walkthrough\Connection $connection, $command_line) {
-  try {
-    $connection->login();
-    $response = $connection->getScreeningQueue();
-  } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
-    echo format_error($e->getResponse());
-    exit($e->getResponse()->getStatusCode());
-  }
+  $connection->login();
+  $response = $connection->getScreeningQueue();
 
   var_dump($response);
 }
 
 function command__get_phpunit(\Walkthrough\Connection $connection, $command_line) {
-  try {
-    $connection->login();
-    $response = $connection->getPhpunit($command_line[1], $command_line[2]);
-  } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
-    echo format_error($e->getResponse());
-    exit($e->getResponse()->getStatusCode());
-  }
+  $connection->login();
+  $response = $connection->getPhpunit($command_line[1], $command_line[2]);
 
   echo $response;
 }
 
 function command__process_queue(\Walkthrough\Connection $connection, $command_line) {
-  try {
-    $connection->login();
+  $connection->login();
 
-    // Query queue.
-    $queue = $connection->getScreeningQueue();
-    if (empty($queue)) {
-      echo "Queue is empty.\n";
-      exit();
-    }
-    $walkthrough_to_play = array_pop($queue);
-
-    // Create empty screening.
-
-    // Remove screening flag.
-    $connection->updateScreeningFlag($walkthrough_to_play['uuid'], FALSE);
-
-    // Get phpunit output.
-    $response = $connection->getPhpunit($walkthrough_to_play['type'], $walkthrough_to_play['uuid']);
-    $phpunit_file = tempnam(sys_get_temp_dir(), 'wt-');
-    $handle = fopen($phpunit_file, 'w');
-    fwrite($handle, $response);
-    fclose($handle);
-
-    // Execute phpunit.
-    system("phpunit $phpunit_file");
-    unlink($phpunit_file);
-
-    // Post results back.
-
-  } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
-    echo format_error($e->getResponse());
-    exit($e->getResponse()->getStatusCode());
+  // Query queue.
+  $queue = $connection->getScreeningQueue();
+  if (empty($queue)) {
+    echo "Queue is empty.\n";
+    exit();
   }
+  $walkthrough_to_play = array_pop($queue);
+
+  // Create empty screening.
+
+  // Remove screening flag.
+  $connection->updateScreeningFlag($walkthrough_to_play['uuid'], FALSE);
+
+  // Get phpunit output.
+  $response = $connection->getPhpunit($walkthrough_to_play['type'], $walkthrough_to_play['uuid']);
+  $phpunit_file = tempnam(sys_get_temp_dir(), 'wt-');
+  $handle = fopen($phpunit_file, 'w');
+  fwrite($handle, $response);
+  fclose($handle);
+
+  // Execute phpunit.
+  system("phpunit $phpunit_file");
+  unlink($phpunit_file);
+
+  // Post results back.
 }
 
 function command__flag(\Walkthrough\Connection $connection, $command_line) {
   $uuid = $command_line[1];
   $flag = $command_line[2];
 
-  try {
-    $connection->login();
-    $connection->updateScreeningFlag($uuid, $flag);
-  } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
-    echo format_error($e->getResponse());
-    exit($e->getResponse()->getStatusCode());
-  }
+  $connection->login();
+  $connection->updateScreeningFlag($uuid, $flag);
 }
 
 /**

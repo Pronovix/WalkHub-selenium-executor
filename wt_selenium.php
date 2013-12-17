@@ -59,8 +59,7 @@ $command_line->option('debug')
 
 $function_name = 'command__' . $command_line[0];
 if (function_exists($function_name)) {
-  $connection = new Connection();
-
+  // Prepare authenticator object.
   try {
     $authenticator = Authenticator\AuthenticatorFactory::create($command_line);
   } catch (NotAuthenticatedException $e) {
@@ -75,6 +74,9 @@ if (function_exists($function_name)) {
     $authenticator = new \Walkthrough\Authenticator\Anonymous();
     $authenticator->setEndpoint($command_line['walkhub_url'] . '/api/v2');
   }
+
+  // Prepare connection
+  $connection = new Connection();
   $connection->setAuthenticator($authenticator);
   $connection->setEndpoint($authenticator->getEndpoint());
 
@@ -82,5 +84,11 @@ if (function_exists($function_name)) {
     echo "Endpoint set to: " . $authenticator->getEndpoint() . "\n";
   }
 
-  call_user_func($function_name, $connection, $command_line);
+  // Dispatch command.
+  try {
+    call_user_func($function_name, $connection, $command_line);
+  } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
+    echo format_error($e->getResponse());
+    exit($e->getResponse()->getStatusCode());
+  }
 }
