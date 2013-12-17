@@ -1,6 +1,12 @@
 <?php
 
-function command__status(\Walkthrough\Connection $connection, $command_line) {
+/**
+ * Command callback to check the connection status.
+ *
+ * @param \Walkthrough\Connection $connection
+ * @param ArrayAccess $command_line
+ */
+function command__status(\Walkthrough\Connection $connection, \ArrayAccess $command_line) {
   $user = $connection->login();
 
   if ($command_line['debug']) {
@@ -11,21 +17,43 @@ function command__status(\Walkthrough\Connection $connection, $command_line) {
   echo "Ok.\n";
 }
 
-function command__get_queue(\Walkthrough\Connection $connection, $command_line) {
+/**
+ * Command callback to get the sreening queue.
+ *
+ * @param \Walkthrough\Connection $connection
+ * @param ArrayAccess $command_line
+ */
+function command__get_queue(\Walkthrough\Connection $connection, \ArrayAccess $command_line) {
   $connection->login();
   $response = $connection->getScreeningQueue();
 
   var_dump($response);
 }
 
-function command__get_phpunit(\Walkthrough\Connection $connection, $command_line) {
+/**
+ * Command callback to get a phpunit export for a walkthrough or walkthrough
+ * suite.
+ *
+ * @param \Walkthrough\Connection $connection
+ * @param ArrayAccess $command_line
+ */
+function command__get_phpunit(\Walkthrough\Connection $connection, \ArrayAccess $command_line) {
   $connection->login();
   $response = $connection->getPhpunit($command_line[1], $command_line[2]);
 
   echo $response;
 }
 
-function command__process_queue(\Walkthrough\Connection $connection, $command_line) {
+/**
+ * Command callback to process the screening queue.
+ *
+ * Get the first element, unset the screening flag, run the phpunit test and
+ * post back the results.
+ *
+ * @param \Walkthrough\Connection $connection
+ * @param ArrayAccess $command_line
+ */
+function command__process_queue(\Walkthrough\Connection $connection, \ArrayAccess $command_line) {
   $connection->login();
 
   // Query queue.
@@ -55,7 +83,13 @@ function command__process_queue(\Walkthrough\Connection $connection, $command_li
   // Post results back.
 }
 
-function command__flag(\Walkthrough\Connection $connection, $command_line) {
+/**
+ * Command callback to flag/unflag a Walkthrough or a Walkthrough set.
+ *
+ * @param \Walkthrough\Connection $connection
+ * @param ArrayAccess $command_line
+ */
+function command__flag(\Walkthrough\Connection $connection, \ArrayAccess $command_line) {
   $uuid = $command_line[1];
   $flag = $command_line[2];
 
