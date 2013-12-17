@@ -66,7 +66,7 @@ if (function_exists($function_name)) {
   } catch (NotAuthenticatedException $e) {
     $warning_message = "Warning: Authentication not set, using anonymous session (most endpoints will not work).\n";
     $warning_message .= "  Use the -u and -p flags for basic HTTP authentication.\n";
-    $warning_message .="  Use the -k and -s flags for 2-legged OAuth authentication.\n\n";
+    $warning_message .= "  Use the -k and -s flags for 2-legged OAuth authentication.\n\n";
     echo $warning_message;
 
     // We let it continue, good for testing if we can reach endpoints

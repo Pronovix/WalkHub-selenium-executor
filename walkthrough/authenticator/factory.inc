@@ -1,8 +1,8 @@
 <?php
 
 namespace Walkthrough\Authenticator;
-use Walkthrough\Authenticator;
 
+use Walkthrough\Authenticator;
 
 
 class AuthenticatorFactory {
@@ -38,7 +38,8 @@ class AuthenticatorFactory {
       $authenticator = new Basic();
       $authenticator->setUsername($settings['username']);
       $authenticator->setPassword($settings['password']);
-    } elseif ($settings['consumer key'] && $settings['consumer secret']) {
+    }
+    elseif ($settings['consumer key'] && $settings['consumer secret']) {
       // Oauth authentication.
       include_once 'walkthrough/authenticator/oauth.inc';
 

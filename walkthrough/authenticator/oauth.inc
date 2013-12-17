@@ -1,8 +1,9 @@
 <?php
 
 namespace Walkthrough\Authenticator;
-use Walkthrough\Authenticator;
+
 use Guzzle\Plugin\Oauth\OauthPlugin;
+use Walkthrough\Authenticator;
 
 include_once 'abstract.inc';
 
@@ -73,7 +74,7 @@ class Oauth extends WalkthroughAuthenticator {
     $client = parent::getClient();
 
     $oauth = new OauthPlugin(array(
-      'consumer_key'    => $this->getConsumerKey(),
+      'consumer_key' => $this->getConsumerKey(),
       'consumer_secret' => $this->getConsumerSecret(),
     ));
 

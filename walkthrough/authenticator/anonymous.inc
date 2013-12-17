@@ -1,6 +1,7 @@
 <?php
 
 namespace Walkthrough\Authenticator;
+
 use Walkthrough\Authenticator;
 
 include_once 'abstract.inc';

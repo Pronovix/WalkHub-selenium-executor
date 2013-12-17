@@ -1,13 +1,14 @@
 <?php
 
 namespace Walkthrough\Authenticator;
+
 use Guzzle\Http\Client;
 
 /**
  * Class NotAuthenticatedException
  * @package Walkthrough\Authenticator
  */
-class NotAuthenticatedException extends \Exception {};
+class NotAuthenticatedException extends \Exception {}
 
 /**
  * Class WalkthroughAuthenticator

@@ -1,6 +1,7 @@
 <?php
 
 namespace Walkthrough\Authenticator;
+
 use Walkthrough\Authenticator;
 
 include_once 'abstract.inc';
@@ -11,7 +12,7 @@ class Basic extends WalkthroughAuthenticator {
 
   public function login() {
     $client = $this->getClient();
-    $response = $client->post('user/login', null, array(
+    $response = $client->post('user/login', NULL, array(
       'username' => $this->username,
       'password' => $this->password,
     ))->send()->json();
