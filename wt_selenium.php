@@ -63,9 +63,6 @@ if (function_exists($function_name)) {
     $authenticator = new Walkthrough\Authenticator\Basic();
     $authenticator->setUsername($command_line['username']);
     $authenticator->setPassword($command_line['password']);
-
-    $authenticator->setEndpoint($endpoint);
-    $connection->setEndpoint($endpoint);
   }
 
   // OAuth authentication.
@@ -76,16 +73,25 @@ if (function_exists($function_name)) {
     $authenticator->setConsumerSecret($command_line['consumer secret']);
 
     $endpoint .= '/oauth';
-    $authenticator->setEndpoint($endpoint);
-    $connection->setEndpoint($endpoint);
   }
 
+  // If we don't have authentication we fall back to Anonymous session.
   if ($authenticator === NULL) {
-    echo "Please set an authentication method.\n";
-    exit(2);
+    echo "Warning: Authentication not set, using anonymous session (most endpoints will not work).\n";
+    echo "  Use the -u and -p flags for basic HTTP authentication.\n";
+    echo "  Use the -k and -s flags for 2-legged OAuth authentication.\n\n";
+
+    include_once 'walkthrough/authenticator/anonymous.inc';
+    $authenticator = new \Walkthrough\Authenticator\Anonymous();
   }
 
   $connection->setAuthenticator($authenticator);
+
+  if ($command_line['debug']) {
+    echo "Endpoint set to: $endpoint\n";
+  }
+  $authenticator->setEndpoint($endpoint);
+  $connection->setEndpoint($endpoint);
 
   call_user_func($function_name, $connection, $command_line);
 }

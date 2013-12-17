@@ -80,8 +80,13 @@ function command__flag(\Walkthrough\Connection $connection, $command_line) {
   $uuid = $command_line[1];
   $flag = $command_line[2];
 
-  $connection->login();
-  $connection->updateScreeningFlag($uuid, $flag);
+  try {
+    $connection->login();
+    $connection->updateScreeningFlag($uuid, $flag);
+  } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
+    echo format_error($e->getResponse());
+    exit($e->getResponse()->getStatusCode());
+  }
 }
 
 /**

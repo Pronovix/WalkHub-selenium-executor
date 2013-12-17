@@ -67,15 +67,17 @@ class Connection {
     $response = $client->post($this->endpoint . '/user/token')->send()->json();
     $token = $response['token'];
 
-    $response = $client->put('walkthrough-screening-flag/'. $uuid,
+    $client->put('walkthrough-screening-flag/'. $uuid,
       array('X-CSRF-TOKEN' => $token),
       array('flag' => $flag_value)
     )->send()->json();
-
-    return $response;
   }
 
   /**
+   * Set the Authenticator object.
+   *
+   * It returns an authenticated client session via getClient().
+   *
    * @param \Walkthrough\Authenticator\WalkthroughAuthenticator $authenticator
    */
   public function setAuthenticator(\Walkthrough\Authenticator\WalkthroughAuthenticator $authenticator) {
