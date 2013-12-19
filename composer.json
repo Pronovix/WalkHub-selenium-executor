@@ -3,7 +3,9 @@
     "description": "Jenkins tasks and helper scripts to retrieve and play Walkthroughs via Selenium.",
     "require": {
         "guzzle/guzzle": "*",
-        "nategood/commando": "*"
+        "nategood/commando": "*",
+        "phpunit/phpunit": "3.7.*",
+        "phpunit/phpunit-selenium": "1.3.*"
     },
     "authors": [
         {
