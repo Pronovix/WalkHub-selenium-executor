@@ -74,6 +74,24 @@ class Connection {
   }
 
   /**
+   *
+   *
+   * @param $uuid
+   * @param $screenshots
+   */
+  public function uploadScreeningScreenshot($uuid, $screenshots) {
+    $client = $this->authenticator->getClient();
+
+    $response = $client->post($this->endpoint . '/user/token')->send()->json();
+    $token = $response['token'];
+
+    $request = $client->put('walkhub-screening/' . $uuid, array('X-CSRF-TOKEN' => $token))
+      ->addPostFile('screenshots', $screenshots);
+
+    $request->send();
+  }
+
+  /**
    * Set the Authenticator object.
    *
    * It returns an authenticated client session via getClient().

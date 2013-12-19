@@ -98,6 +98,21 @@ function command__flag(\Walkthrough\Connection $connection, \ArrayAccess $comman
 }
 
 /**
+ *
+ *
+ * @param \Walkthrough\Connection $connection
+ * @param ArrayAccess $command_line
+ */
+function command__upload_screenshot(\Walkthrough\Connection $connection, \ArrayAccess $command_line) {
+  $uuid = $command_line[1];
+  $screenshots = array(
+    '/Users/hairqles/Pictures/profil.jpg',
+  );
+  $connection->login();
+  $connection->uploadScreeningScreenshot($uuid, $screenshots);
+}
+
+/**
  * Formats a Guzzle error response to the command line.
  *
  * @param \Guzzle\Http\Message\Response $response
