@@ -64,7 +64,7 @@ class Connection {
   public function updateScreeningFlag($uuid, $flag_value) {
     $client = $this->authenticator->getClient();
 
-    $response = $client->post($this->endpoint . '/user/token')->send()->json();
+    $response = $client->post('user/token')->send()->json();
     $token = $response['token'];
 
     $client->put('walkthrough-screening-flag/'. $uuid,
@@ -79,16 +79,23 @@ class Connection {
    * @param $uuid
    * @param $screenshots
    */
-  public function uploadScreeningScreenshot($uuid, $screenshots) {
+  public function uploadScreeningScreenshot($uuid, $screenshot, $step=NULL) {
     $client = $this->authenticator->getClient();
 
-    $response = $client->post($this->endpoint . '/user/token')->send()->json();
+    $response = $client->post('user/token')->send()->json();
     $token = $response['token'];
 
-    $request = $client->put('walkhub-screening/' . $uuid, array('X-CSRF-TOKEN' => $token))
-      ->addPostFile('screenshots', $screenshots);
+    $request = $client->put('walkhub-screening/' . $uuid, array('X-CSRF-TOKEN' => $token),
+    array(
+      'screenshots' =>array(
+        array(
+          'step' => $step,
+          'file' => base64_encode(file_get_contents($screenshot)),
+        ),
+      ),
+    ));
 
-    $request->send();
+    $response = $request->send();
   }
 
   /**
@@ -106,6 +113,7 @@ class Connection {
    * Set the rest endpoint.
    *
    * @param string $endpoint
+   *   Rest endpoint.
    */
   public function setEndpoint($endpoint) {
     $this->endpoint = $endpoint;

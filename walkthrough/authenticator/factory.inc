@@ -57,7 +57,6 @@ class AuthenticatorFactory {
 
     $authenticator->setEndpoint($endpoint);
 
-
     return $authenticator;
   }
 }
