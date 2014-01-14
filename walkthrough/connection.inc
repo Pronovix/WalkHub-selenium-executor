@@ -73,13 +73,32 @@ class Connection {
     )->send()->json();
   }
 
+  public function createEmptyScreening($referenced_walkthrough = NULL) {
+    $client = $this->authenticator->getClient();
+
+    $response = $client->post('user/token')->send()->json();
+    $token = $response['token'];
+
+    $post_data = array('title' => 'Automatic screening');
+    if($referenced_walkthrough) {
+      $post_data += array('referenced_walkthrough' => $referenced_walkthrough);
+    }
+
+    $response = $client->post('walkhub-screening',
+      array('X-CSRF-TOKEN' => $token),
+      $post_data
+    )->send()->json();
+
+    return $response[0];
+  }
+
   /**
    *
    *
    * @param $uuid
    * @param $screenshots
    */
-  public function uploadScreeningScreenshot($uuid, $screenshot, $step=NULL) {
+  public function uploadScreeningScreenshot($uuid, $screenshot, $step = NULL) {
     $client = $this->authenticator->getClient();
 
     $response = $client->post('user/token')->send()->json();
@@ -87,7 +106,7 @@ class Connection {
 
     $request = $client->put('walkhub-screening/' . $uuid, array('X-CSRF-TOKEN' => $token),
     array(
-      'screenshots' =>array(
+      'screenshots' => array(
         array(
           'step' => $step,
           'file' => base64_encode(file_get_contents($screenshot)),
