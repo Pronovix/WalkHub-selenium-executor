@@ -64,13 +64,57 @@ class Connection {
   public function updateScreeningFlag($uuid, $flag_value) {
     $client = $this->authenticator->getClient();
 
-    $response = $client->post($this->endpoint . '/user/token')->send()->json();
+    $response = $client->post('user/token')->send()->json();
     $token = $response['token'];
 
     $client->put('walkthrough-screening-flag/'. $uuid,
       array('X-CSRF-TOKEN' => $token),
       array('flag' => $flag_value)
     )->send()->json();
+  }
+
+  public function createEmptyScreening($referenced_walkthrough = NULL) {
+    $client = $this->authenticator->getClient();
+
+    $response = $client->post('user/token')->send()->json();
+    $token = $response['token'];
+
+    $post_data = array('title' => 'Automatic screening');
+    if($referenced_walkthrough) {
+      $post_data += array('referenced_walkthrough' => $referenced_walkthrough);
+    }
+
+    $response = $client->post('walkhub-screening',
+      array('X-CSRF-TOKEN' => $token),
+      $post_data
+    )->send()->json();
+
+    return $response[0];
+  }
+
+  /**
+   *
+   *
+   * @param $uuid
+   * @param $screenshots
+   */
+  public function uploadScreeningScreenshot($uuid, $screenshot, $step = NULL) {
+    $client = $this->authenticator->getClient();
+
+    $response = $client->post('user/token')->send()->json();
+    $token = $response['token'];
+
+    $request = $client->put('walkhub-screening/' . $uuid, array('X-CSRF-TOKEN' => $token),
+    array(
+      'screenshots' => array(
+        array(
+          'step' => $step,
+          'file' => base64_encode(file_get_contents($screenshot)),
+        ),
+      ),
+    ));
+
+    $response = $request->send();
   }
 
   /**
@@ -88,6 +132,7 @@ class Connection {
    * Set the rest endpoint.
    *
    * @param string $endpoint
+   *   Rest endpoint.
    */
   public function setEndpoint($endpoint) {
     $this->endpoint = $endpoint;

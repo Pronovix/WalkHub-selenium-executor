@@ -64,8 +64,6 @@ function command__process_queue(\Walkthrough\Connection $connection, \ArrayAcces
   }
   $walkthrough_to_play = array_pop($queue);
 
-  // Create empty screening.
-
   // Remove screening flag.
   $connection->updateScreeningFlag($walkthrough_to_play['uuid'], FALSE);
 
@@ -76,11 +74,47 @@ function command__process_queue(\Walkthrough\Connection $connection, \ArrayAcces
   fwrite($handle, $response);
   fclose($handle);
 
+  // Prepare screenshot directory.
+  $screenshot_dir = uniqid(sys_get_temp_dir() . '/wtscreenshot');
+  mkdir($screenshot_dir, 0700);
+
   // Execute phpunit.
   system("phpunit $phpunit_file");
+  system('WT_SCREENSHOT_PATH="' . $screenshot_dir . '/" ./vendor/bin/phpunit  --bootstrap bootstrap.inc ' . $phpunit_file);
   unlink($phpunit_file);
 
   // Post results back.
+  upload_screenshots($connection, $screenshot_dir, $walkthrough_to_play['uuid']);
+
+  // Clean up screenshot files.
+  foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($screenshot_dir, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $path) {
+    $path->isFile() ? unlink($path->getPathname()) : rmdir($path->getPathname());
+  }
+  rmdir($screenshot_dir);
+}
+
+/**
+ * Helper function to upload screenshots from a directory to a screening content type.
+ *
+ * @param \Walkthrough\Connection $connection
+ *   Walkthrough connection object.
+ * @param string $directory
+ *   Directory containing the screenshots.
+ * @param string $walkthrough_uuid
+ *   Walkthrough uuid to upload the screening to.
+ */
+function upload_screenshots(\Walkthrough\Connection $connection, $directory, $walkthrough_uuid) {
+  $screening_uuid = $connection->createEmptyScreening($walkthrough_uuid);
+
+  $iterator = new DirectoryIterator($directory);
+  foreach ($iterator as $path) {
+    if ($path->isDot()) {
+      continue;
+    }
+
+    list($nid, $step_id) = explode(':', $path->getFilename());
+    $connection->uploadScreeningScreenshot($screening_uuid, $path->getPathname(), (int) $step_id);
+  }
 }
 
 /**
