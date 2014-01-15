@@ -44,10 +44,14 @@ $command_line->argument()
 
   * get_phpunit [walkthrough|walkthrough_set] [uuid]
     Get the phpunit export for a walkthrough.
+    Use --extend_custom_class to have the test extend your own class instead of
+    PHPUnit_Extensions_Selenium2TestCase.
 
   * process_queue
     Gets the first item of the queue and executes the phpunit test, when ready
     posts back the results and the screenshots to the screening.
+    Use --extend_custom_class to have the test extend your own class instead of
+    PHPUnit_Extensions_Selenium2TestCase.
 
   * flag [uuid] [0|1]
     Flags/unflags a Walkthrough or Walkthrough set.');
@@ -56,6 +60,10 @@ $command_line->option('debug')
   ->aka('d')
   ->describedAs('Debug mode')
   ->boolean();
+
+$command_line->option('extend_custom_class')
+  ->aka('e')
+  ->describedAs('Extend custom class');
 
 $function_name = 'command__' . $command_line[0];
 if (function_exists($function_name)) {

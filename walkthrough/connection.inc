@@ -33,24 +33,33 @@ class Connection {
   /**
    * Gets the PHPUnit output for a walkthrough or a walkthrough set.
    *
-   * @param $type string
+   * @param stromg $type
    *   Entity type to render.
    *   "walkthrough" or "walkthrough_set"
-   * @param $uuid string
+   * @param string $uuid
    *   Universally unique ID.
+   * @param string|bool $extend_custom_class
+   *   Custom class to extend, or FALSE to extend the default webdriver
+   *  selenium class.
    *
    * @return string
    *   PHPUnit script.
    */
-  public function getPhpunit($type, $uuid) {
+  public function getPhpunit($type, $uuid, $extend_custom_class = FALSE) {
     $client = $this->authenticator->getClient();
 
     if ($type == 'walkthrough') {
-      $response = $client->get('walkthrough-phpunit/' . $uuid)->send()->json();
+      $get_url = 'walkthrough-phpunit/' . $uuid;
     }
     else {
-      $response = $client->get('walkthrough-set-phpunit/' . $uuid)->send()->json();
+      $get_url = 'walkthrough-set-phpunit/' . $uuid;
     }
+
+    if ($extend_custom_class) {
+      $get_url .= '/' . $extend_custom_class;
+    }
+
+    $response = $client->get($get_url)->send()->json();
 
     return $response[0];
   }
