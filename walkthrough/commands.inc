@@ -39,7 +39,7 @@ function command__get_queue(\Walkthrough\Connection $connection, \ArrayAccess $c
  */
 function command__get_phpunit(\Walkthrough\Connection $connection, \ArrayAccess $command_line) {
   $connection->login();
-  $response = $connection->getPhpunit($command_line[1], $command_line[2]);
+  $response = $connection->getPhpunit($command_line[1], $command_line[2], $command_line['extend_custom_class']);
 
   echo $response;
 }
@@ -68,7 +68,7 @@ function command__process_queue(\Walkthrough\Connection $connection, \ArrayAcces
   $connection->updateScreeningFlag($walkthrough_to_play['uuid'], FALSE);
 
   // Get phpunit output.
-  $response = $connection->getPhpunit($walkthrough_to_play['type'], $walkthrough_to_play['uuid']);
+  $response = $connection->getPhpunit($walkthrough_to_play['type'], $walkthrough_to_play['uuid'], $command_line['extend_custom_class']);
   $phpunit_file = tempnam(sys_get_temp_dir(), 'wt-');
   $handle = fopen($phpunit_file, 'w');
   fwrite($handle, $response);
@@ -125,7 +125,7 @@ function upload_screenshots(\Walkthrough\Connection $connection, $directory, $wa
  */
 function command__flag(\Walkthrough\Connection $connection, \ArrayAccess $command_line) {
   $uuid = $command_line[1];
-  $flag = $command_line[2];
+  $flag = isset($command_line[2]) ? $command_line[2] : TRUE;
 
   $connection->login();
   $connection->updateScreeningFlag($uuid, $flag);
