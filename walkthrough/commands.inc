@@ -78,9 +78,22 @@ function command__process_queue(\Walkthrough\Connection $connection, \ArrayAcces
   $screenshot_dir = uniqid(sys_get_temp_dir() . '/wtscreenshot');
   mkdir($screenshot_dir, 0700);
 
+  // Prepare environment variables.
+  $environment_array = array(
+    'WT_SCREENSHOT_PATH' => $screenshot_dir . '/',
+  );
+
+  if ($command_line['browser']) {
+    $environment_array += array('WT_BROWSER' => $command_line['browser']);
+  }
+
+  $environment = '';
+  foreach ($environment_array as $variable => $setting) {
+    $environment .= $variable . '="' . $setting . '" ';
+  }
+
   // Execute phpunit.
-  system("phpunit $phpunit_file");
-  system('WT_SCREENSHOT_PATH="' . $screenshot_dir . '/" ./vendor/bin/phpunit  --bootstrap bootstrap.inc ' . $phpunit_file);
+  system($environment . ' ./vendor/bin/phpunit  --bootstrap bootstrap.inc ' . $phpunit_file);
   unlink($phpunit_file);
 
   // Post results back.
