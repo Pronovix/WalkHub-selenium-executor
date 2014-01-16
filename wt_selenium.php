@@ -52,6 +52,7 @@ $command_line->argument()
     posts back the results and the screenshots to the screening.
     Use --extend_custom_class to have the test extend your own class instead of
     PHPUnit_Extensions_Selenium2TestCase.
+    Use --browser to override the default browser (firefox).
 
   * flag [uuid] [0|1]
     Flags/unflags a Walkthrough or Walkthrough set.');
@@ -65,12 +66,18 @@ $command_line->option('extend_custom_class')
   ->aka('e')
   ->describedAs('Extend custom class');
 
+$command_line->option('browser')
+  ->aka('b')
+  ->describedAs('Run selenium via a custom browser.
+If ommitted, tests will run using firefox.');
+
 $function_name = 'command__' . $command_line[0];
 if (function_exists($function_name)) {
   // Prepare authenticator object.
   try {
     $authenticator = Authenticator\AuthenticatorFactory::create($command_line);
-  } catch (NotAuthenticatedException $e) {
+  }
+  catch (NotAuthenticatedException $e) {
     $warning_message = "Warning: Authentication not set, using anonymous session (most endpoints will not work).\n";
     $warning_message .= "  Use the -u and -p flags for basic HTTP authentication.\n";
     $warning_message .= "  Use the -k and -s flags for 2-legged OAuth authentication.\n\n";
@@ -79,11 +86,11 @@ if (function_exists($function_name)) {
     // We let it continue, good for testing if we can reach endpoints
     // unauthenticated (We shouldn't...).
     include_once 'walkthrough/authenticator/anonymous.inc';
-    $authenticator = new \Walkthrough\Authenticator\Anonymous();
+    $authenticator = new Authenticator\Anonymous();
     $authenticator->setEndpoint($command_line['walkhub_url'] . '/api/v2');
   }
 
-  // Prepare connection
+  // Prepare connection.
   $connection = new Connection();
   $connection->setAuthenticator($authenticator);
   $connection->setEndpoint($authenticator->getEndpoint());
@@ -95,7 +102,8 @@ if (function_exists($function_name)) {
   // Dispatch command.
   try {
     call_user_func($function_name, $connection, $command_line);
-  } catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
+  }
+  catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
     echo format_error($e->getResponse());
     exit($e->getResponse()->getStatusCode());
   }
