@@ -1,6 +1,15 @@
 <?php
 
 /**
+ * Walkthrough selenium return statuses.
+ *
+ * These are the possible values of the field_screening_result field in the screening content type.
+ */
+define('WALKTHROUGH_SELENIUM_RESULT_SUCCESS', 'Successful');
+define('WALKTHROUGH_SELENIUM_RESULT_TIMEOUT', 'Timeout');
+define('WALKTHROUGH_SELENIUM_RESULT_BROKEN', 'Broken');
+
+/**
  * Command callback to check the connection status.
  *
  * @param \Walkthrough\Connection $connection
@@ -14,7 +23,13 @@ function command__status(\Walkthrough\Connection $connection, \ArrayAccess $comm
     var_dump($user);
   }
 
-  echo "Ok.\n";
+  if (!empty($user)) {
+    echo "Ok.\n";
+    exit(0);
+  }
+
+  echo "Error.\n";
+  exit(1);
 }
 
 /**
@@ -78,26 +93,34 @@ function command__process_queue(\Walkthrough\Connection $connection, \ArrayAcces
   $screenshot_dir = uniqid(sys_get_temp_dir() . '/wtscreenshot');
   mkdir($screenshot_dir, 0700);
 
+  $junit_log_file = tempnam(sys_get_temp_dir(), 'wt-junit-');
+
   // Prepare environment variables.
   $environment_array = array(
     'WT_SCREENSHOT_PATH' => $screenshot_dir . '/',
   );
-
   if ($command_line['browser']) {
     $environment_array += array('WT_BROWSER' => $command_line['browser']);
   }
-
   $environment = '';
   foreach ($environment_array as $variable => $setting) {
     $environment .= $variable . '="' . $setting . '" ';
   }
 
   // Execute phpunit.
-  system($environment . ' ./vendor/bin/phpunit  --bootstrap bootstrap.inc ' . $phpunit_file);
+  $return_value = 0;
+  $time_start = microtime(TRUE);
+  system("$environment ./vendor/bin/phpunit  --bootstrap bootstrap.inc --log-junit $junit_log_file $phpunit_file", $return_value);
+  $time_stop = microtime(TRUE);
+  $elapsed_time = $time_stop - $time_start;
   unlink($phpunit_file);
 
   // Post results back.
-  upload_screenshots($connection, $screenshot_dir, $walkthrough_to_play['uuid']);
+  $screening_uuid = $connection->createEmptyScreening($walkthrough_to_play['uuid']);
+  $connection->sendScreeningResult($screening_uuid, array('result' => (($return_value == 0) ? WALKTHROUGH_SELENIUM_RESULT_SUCCESS : WALKTHROUGH_SELENIUM_RESULT_BROKEN)));
+  $connection->sendScreeningResult($screening_uuid, array('junit' => file_get_contents($junit_log_file)));
+  $connection->sendScreeningResult($screening_uuid, array('time' => $elapsed_time));
+  upload_screenshots($connection, $screenshot_dir, $screening_uuid);
 
   // Clean up screenshot files.
   foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($screenshot_dir, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $path) {
@@ -113,12 +136,10 @@ function command__process_queue(\Walkthrough\Connection $connection, \ArrayAcces
  *   Walkthrough connection object.
  * @param string $directory
  *   Directory containing the screenshots.
- * @param string $walkthrough_uuid
- *   Walkthrough uuid to upload the screening to.
+ * @param string $screening_uuid
+ *   Screening uuid to upload the screening to.
  */
-function upload_screenshots(\Walkthrough\Connection $connection, $directory, $walkthrough_uuid) {
-  $screening_uuid = $connection->createEmptyScreening($walkthrough_uuid);
-
+function upload_screenshots(\Walkthrough\Connection $connection, $directory, $screening_uuid) {
   $iterator = new DirectoryIterator($directory);
   foreach ($iterator as $path) {
     if ($path->isDot()) {
