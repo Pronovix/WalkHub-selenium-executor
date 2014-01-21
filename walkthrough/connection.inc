@@ -72,11 +72,9 @@ class Connection {
    */
   public function updateScreeningFlag($uuid, $flag_value) {
     $client = $this->authenticator->getClient();
+    $token = $this->getToken($client);
 
-    $response = $client->post('user/token')->send()->json();
-    $token = $response['token'];
-
-    $client->put('walkthrough-screening-flag/'. $uuid,
+    $client->put('walkthrough-screening-flag/' . $uuid,
       array('X-CSRF-TOKEN' => $token),
       array('flag' => $flag_value)
     )->send()->json();
@@ -84,12 +82,10 @@ class Connection {
 
   public function createEmptyScreening($referenced_walkthrough = NULL) {
     $client = $this->authenticator->getClient();
-
-    $response = $client->post('user/token')->send()->json();
-    $token = $response['token'];
+    $token = $this->getToken($client);
 
     $post_data = array('title' => 'Automatic screening');
-    if($referenced_walkthrough) {
+    if ($referenced_walkthrough) {
       $post_data += array('referenced_walkthrough' => $referenced_walkthrough);
     }
 
@@ -102,16 +98,47 @@ class Connection {
   }
 
   /**
+   * Post back the screening results.
    *
+   * @param string $screening_uuid
+   *   UUID of the screening node to post the results to.
    *
-   * @param $uuid
-   * @param $screenshots
+   * @param array $result
+   *   Screening result.
+   *   Possible keys:
+   *   - result: If the screening was successful or not.
+   *   - junit: Junit result.
+   *   - time: Time it took to take the screenshots.
+   */
+  public function sendScreeningResult($screening_uuid, $result) {
+    $client = $this->authenticator->getClient();
+    $token = $this->getToken($client);
+
+    $client->put('walkhub-screening/' . $screening_uuid,
+      array('X-CSRF-TOKEN' => $token),
+      $result
+    )->send()->json();
+  }
+
+  /**
+   * Upload a screenshot for a screening.
+   *
+   * @param string $uuid
+   *   UUID of the screening node to post the screenshots to.
+   *
+   * @param string $screenshot
+   *   Filename of the screenshot.
+   *
+   * @param int|NULL $step
+   *   (Optional) Step id.
+   *   If not provided the server side will try to guess the step.
+   *
+   * @return string
+   *   Query response.
    */
   public function uploadScreeningScreenshot($uuid, $screenshot, $step = NULL) {
     $client = $this->authenticator->getClient();
-
-    $response = $client->post('user/token')->send()->json();
-    $token = $response['token'];
+    $token = $this->getToken($client);
 
     $request = $client->put('walkhub-screening/' . $uuid, array('X-CSRF-TOKEN' => $token),
     array(
@@ -124,6 +151,7 @@ class Connection {
     ));
 
     $response = $request->send();
+    return $response;
   }
 
   /**
@@ -145,5 +173,21 @@ class Connection {
    */
   public function setEndpoint($endpoint) {
     $this->endpoint = $endpoint;
+  }
+
+  /**
+   * Get a drupal token.
+   *
+   * @param \Guzzle\Http\Client $client
+   *   Guzzle http client connection.
+   *
+   * @return string
+   *   Drupal token.
+   */
+  public function getToken($client) {
+    $response = $client->post('user/token')->send()->json();
+    $token = $response['token'];
+
+    return $token;
   }
 }

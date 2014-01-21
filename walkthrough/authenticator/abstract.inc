@@ -32,19 +32,25 @@ abstract class WalkthroughAuthenticator {
    * Log in to Drupal.
    *
    * @return \stdClass
-   * Logged in Drupal user object.
+   *   Logged in Drupal user object.
    */
   abstract public function login();
 
   /**
+   * Set the connection endpoint.
+   *
    * @param string $endpoint
+   *   Drupal services endpoint.
    */
   public function setEndpoint($endpoint) {
     $this->endpoint = $endpoint;
   }
 
   /**
+   * Set the connection endpoint.
+   *
    * @return string
+   *   Drupal services endpoint.
    */
   public function getEndpoint() {
     return $this->endpoint;
@@ -70,5 +76,4 @@ abstract class WalkthroughAuthenticator {
 
     return $client;
   }
-
 }
