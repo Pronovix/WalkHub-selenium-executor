@@ -140,6 +140,8 @@ function command__process_queue(\Walkthrough\Connection $connection, \ArrayAcces
  *   Screening uuid to upload the screening to.
  */
 function upload_screenshots(\Walkthrough\Connection $connection, $directory, $screening_uuid) {
+  $screenshots = array();
+
   $iterator = new DirectoryIterator($directory);
   foreach ($iterator as $path) {
     if ($path->isDot()) {
@@ -147,7 +149,14 @@ function upload_screenshots(\Walkthrough\Connection $connection, $directory, $sc
     }
 
     list($nid, $step_id) = explode(':', $path->getFilename());
-    $connection->uploadScreeningScreenshot($screening_uuid, $path->getPathname(), (int) $step_id);
+    $screenshots[(int) $step_id] = $directory . DIRECTORY_SEPARATOR . $path->getFilename();
+  }
+
+  // Upload screenshots in the order of steps for simplicity.
+  ksort($screenshots);
+
+  foreach ($screenshots as $step_id => $filename) {
+    $connection->uploadScreeningScreenshot($screening_uuid, $filename, $step_id);
   }
 }
 
