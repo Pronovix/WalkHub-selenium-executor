@@ -67,7 +67,7 @@ $command_line->option('extend_custom_class')
   ->describedAs('Extend custom class');
 
 $command_line->option('process_queue_length')
-  ->aka('pl')
+  ->aka('l')
   ->describedAs('Process queue length');
 
 $command_line->option('browser')
