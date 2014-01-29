@@ -62,9 +62,6 @@ function command__get_phpunit(\Walkthrough\Connection $connection, \ArrayAccess 
 /**
  * Command callback to process the screening queue.
  *
- * Get the first element, unset the screening flag, run the phpunit test and
- * post back the results.
- *
  * @param \Walkthrough\Connection $connection
  * @param ArrayAccess $command_line
  */
@@ -77,13 +74,37 @@ function command__process_queue(\Walkthrough\Connection $connection, \ArrayAcces
     echo "Queue is empty.\n";
     exit();
   }
-  $walkthrough_to_play = array_pop($queue);
 
+  $process_queue_length = 1;
+  if (!empty($command_line['process_queue_length'])) {
+    $process_queue_length = $command_line['process_queue_length'];
+  }
+
+  for ($i = 0; $i < $process_queue_length; $i++) {
+    $walkthrough_to_play = array_pop($queue);
+    if (!empty($walkthrough_to_play['uuid'])) {
+      process_screening($connection, $command_line, $walkthrough_to_play['uuid'], $walkthrough_to_play['type']);
+    }
+  }
+}
+
+/**
+ * Process the given walkthrough.
+ * - Unset the screening flag
+ * - Run the phpunit test
+ * - Post back the results.
+ *
+ * @param \Walkthrough\Connection $connection
+ * @param ArrayAccess $command_line
+ * @param $uuid
+ * @param $type
+ */
+function process_screening(\Walkthrough\Connection $connection, \ArrayAccess $command_line, $uuid, $type) {
   // Remove screening flag.
-  $connection->updateScreeningFlag($walkthrough_to_play['uuid'], FALSE);
+  $connection->updateScreeningFlag($uuid, FALSE);
 
   // Get phpunit output.
-  $response = $connection->getPhpunit($walkthrough_to_play['type'], $walkthrough_to_play['uuid'], $command_line['extend_custom_class']);
+  $response = $connection->getPhpunit($type, $uuid, $command_line['extend_custom_class']);
   $phpunit_file = tempnam(sys_get_temp_dir(), 'wt-');
   $handle = fopen($phpunit_file, 'w');
   fwrite($handle, $response);
@@ -116,7 +137,7 @@ function command__process_queue(\Walkthrough\Connection $connection, \ArrayAcces
   unlink($phpunit_file);
 
   // Post results back.
-  $screening_uuid = $connection->createEmptyScreening($walkthrough_to_play['uuid']);
+  $screening_uuid = $connection->createEmptyScreening($uuid);
   $connection->sendScreeningResult($screening_uuid, array('result' => (($return_value == 0) ? WALKTHROUGH_SELENIUM_RESULT_SUCCESS : WALKTHROUGH_SELENIUM_RESULT_BROKEN)));
   $connection->sendScreeningResult($screening_uuid, array('junit' => file_get_contents($junit_log_file)));
   $connection->sendScreeningResult($screening_uuid, array('time' => $elapsed_time));
