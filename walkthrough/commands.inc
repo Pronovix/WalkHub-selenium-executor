@@ -68,19 +68,19 @@ function command__get_phpunit(\Walkthrough\Connection $connection, \ArrayAccess 
 function command__process_queue(\Walkthrough\Connection $connection, \ArrayAccess $command_line) {
   $connection->login();
 
-  // Query queue.
-  $queue = $connection->getScreeningQueue();
-  if (empty($queue)) {
-    echo "Queue is empty.\n";
-    exit();
-  }
-
   $process_queue_length = 1;
   if (!empty($command_line['process_queue_length'])) {
     $process_queue_length = $command_line['process_queue_length'];
   }
 
   for ($i = 0; $i < $process_queue_length; $i++) {
+    // Query queue.
+    $queue = $connection->getScreeningQueue();
+    if (empty($queue)) {
+      echo "Queue is empty.\n";
+      break;
+    }
+
     $walkthrough_to_play = array_pop($queue);
     process_screening($connection, $command_line, $walkthrough_to_play);
   }
@@ -101,7 +101,7 @@ function process_screening(\Walkthrough\Connection $connection, \ArrayAccess $co
 
   // Remove screening flag.
   format_log($command_line, "Updating screening flag.");
-  $connection->updateScreeningFlag($walkthrough_to_play['uuid'], FALSE);
+  $connection->updateScreeningFlag($walkthrough_to_play['uuid'], 0);
 
   format_log($command_line, "Exporting PHPUnit.");
   $response = $connection->getPhpunit($walkthrough_to_play['type'], $walkthrough_to_play['uuid'], $command_line['extend_custom_class']);
