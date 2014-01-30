@@ -66,6 +66,10 @@ $command_line->option('extend_custom_class')
   ->aka('e')
   ->describedAs('Extend custom class');
 
+$command_line->option('process_queue_length')
+  ->aka('l')
+  ->describedAs('Process queue length');
+
 $command_line->option('browser')
   ->aka('b')
   ->describedAs('Run selenium via a custom browser.

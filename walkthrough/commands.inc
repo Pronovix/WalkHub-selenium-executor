@@ -62,28 +62,53 @@ function command__get_phpunit(\Walkthrough\Connection $connection, \ArrayAccess 
 /**
  * Command callback to process the screening queue.
  *
- * Get the first element, unset the screening flag, run the phpunit test and
- * post back the results.
- *
  * @param \Walkthrough\Connection $connection
  * @param ArrayAccess $command_line
  */
 function command__process_queue(\Walkthrough\Connection $connection, \ArrayAccess $command_line) {
   $connection->login();
 
-  // Query queue.
-  $queue = $connection->getScreeningQueue();
-  if (empty($queue)) {
-    echo "Queue is empty.\n";
-    exit();
+  $process_queue_length = 1;
+  if (!empty($command_line['process_queue_length'])) {
+    $process_queue_length = $command_line['process_queue_length'];
   }
-  $walkthrough_to_play = array_pop($queue);
+
+  for ($i = 0; $i < $process_queue_length; $i++) {
+    // Query queue.
+    $queue = $connection->getScreeningQueue();
+    if (empty($queue)) {
+      echo "Queue is empty.\n";
+      break;
+    }
+
+    $walkthrough_to_play = array_pop($queue);
+    process_screening($connection, $command_line, $walkthrough_to_play);
+  }
+}
+
+/**
+ * Process the given walkthrough.
+ * - Unset the screening flag
+ * - Run the phpunit test
+ * - Post back the results.
+ *
+ * @param \Walkthrough\Connection $connection
+ * @param ArrayAccess $command_line
+ * @param $walkthrough_to_play
+ */
+function process_screening(\Walkthrough\Connection $connection, \ArrayAccess $command_line, $walkthrough_to_play) {
+  format_log($command_line, "Start screening. title: {$walkthrough_to_play['title']} uuid: {$walkthrough_to_play['uuid']}");
 
   // Remove screening flag.
-  $connection->updateScreeningFlag($walkthrough_to_play['uuid'], FALSE);
+  format_log($command_line, "Updating screening flag.");
+  $connection->updateScreeningFlag($walkthrough_to_play['uuid'], 0);
 
-  // Get phpunit output.
+  format_log($command_line, "Exporting PHPUnit.");
   $response = $connection->getPhpunit($walkthrough_to_play['type'], $walkthrough_to_play['uuid'], $command_line['extend_custom_class']);
+  if (empty($response)) {
+    format_log($command_line, "Failed to export PHPUnit: {$response->getBody()}");
+  }
+
   $phpunit_file = tempnam(sys_get_temp_dir(), 'wt-');
   $handle = fopen($phpunit_file, 'w');
   fwrite($handle, $response);
@@ -116,9 +141,16 @@ function command__process_queue(\Walkthrough\Connection $connection, \ArrayAcces
   unlink($phpunit_file);
 
   // Post results back.
+  format_log($command_line, "Creating empty screening.");
   $screening_uuid = $connection->createEmptyScreening($walkthrough_to_play['uuid']);
+
+  format_log($command_line, "Uploading screening results.");
   $connection->sendScreeningResult($screening_uuid, array('result' => (($return_value == 0) ? WALKTHROUGH_SELENIUM_RESULT_SUCCESS : WALKTHROUGH_SELENIUM_RESULT_BROKEN)));
+
+  format_log($command_line, "Uploading screening JUnit.");
   $connection->sendScreeningResult($screening_uuid, array('junit' => file_get_contents($junit_log_file)));
+
+  format_log($command_line, "Uploading screening elapsed time.");
   $connection->sendScreeningResult($screening_uuid, array('time' => $elapsed_time));
   upload_screenshots($connection, $screenshot_dir, $screening_uuid);
 
@@ -182,4 +214,16 @@ function command__flag(\Walkthrough\Connection $connection, \ArrayAccess $comman
  */
 function format_error(Guzzle\Http\Message\Response $response) {
   return 'Error: [' . $response->getStatusCode() . '] ' . $response->getReasonPhrase() . "\n";
+}
+
+/**
+ * Formats a log entry.
+ *
+ * @param ArrayAccess $command_line
+ * @param $message
+ */
+function format_log(\ArrayAccess $command_line, $message) {
+  if ($command_line['debug']) {
+    echo "Log: $message \n";
+  }
 }
