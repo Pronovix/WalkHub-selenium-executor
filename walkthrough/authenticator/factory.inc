@@ -46,8 +46,6 @@ class AuthenticatorFactory {
       $authenticator = new Oauth();
       $authenticator->setConsumerKey($settings['consumer key']);
       $authenticator->setConsumerSecret($settings['consumer secret']);
-
-      $endpoint .= '/oauth';
     }
 
     // If we don't have authentication we fall back to Anonymous session.
