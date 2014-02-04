@@ -105,7 +105,10 @@ if (function_exists($function_name)) {
 
   // Dispatch command.
   try {
-    call_user_func($function_name, $connection, $command_line);
+    $return_code = call_user_func($function_name, $connection, $command_line);
+    if ($return_code !== NULL) {
+      exit($return_code);
+    }
   }
   catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
     echo format_error($e->getResponse());

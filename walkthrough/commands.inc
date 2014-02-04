@@ -73,6 +73,7 @@ function command__process_queue(\Walkthrough\Connection $connection, \ArrayAcces
     $process_queue_length = $command_line['process_queue_length'];
   }
 
+  $return_code = 0;
   for ($i = 0; $i < $process_queue_length; $i++) {
     // Query queue.
     $queue = $connection->getScreeningQueue();
@@ -82,8 +83,14 @@ function command__process_queue(\Walkthrough\Connection $connection, \ArrayAcces
     }
 
     $walkthrough_to_play = array_pop($queue);
-    process_screening($connection, $command_line, $walkthrough_to_play);
+    $result = process_screening($connection, $command_line, $walkthrough_to_play);
+
+    echo ($result == 0) ? '.' : 'E';
+    $return_code |= $result;
   }
+  echo "\n";
+
+  return $return_code;
 }
 
 /**
@@ -95,6 +102,13 @@ function command__process_queue(\Walkthrough\Connection $connection, \ArrayAcces
  * @param \Walkthrough\Connection $connection
  * @param ArrayAccess $command_line
  * @param $walkthrough_to_play
+ *
+ * @return int
+ *   0 on successful screenshot taking, phpunit error code otherwise.
+ *
+ * @see PHPUnit_Runner_BaseTestRunner::SUCCESS_EXIT
+ * @see PHPUnit_Runner_BaseTestRunner::FAILURE_EXIT
+ * @see PHPUnit_Runner_BaseTestRunner::EXCEPTION_EXIT
  */
 function process_screening(\Walkthrough\Connection $connection, \ArrayAccess $command_line, $walkthrough_to_play) {
   format_log($command_line, "Start screening. title: {$walkthrough_to_play['title']} uuid: {$walkthrough_to_play['uuid']}");
@@ -134,9 +148,17 @@ function process_screening(\Walkthrough\Connection $connection, \ArrayAccess $co
 
   // Execute phpunit.
   $return_value = 0;
+  $command = "$environment ./vendor/bin/phpunit  --bootstrap bootstrap.inc --log-junit $junit_log_file $phpunit_file";
+
   $time_start = microtime(TRUE);
-  system("$environment ./vendor/bin/phpunit  --bootstrap bootstrap.inc --log-junit $junit_log_file $phpunit_file", $return_value);
+  if ($command_line['debug']) {
+    system($command, $return_value);
+  }
+  else {
+    exec($command, $output, $return_value);
+  }
   $time_stop = microtime(TRUE);
+
   $elapsed_time = $time_stop - $time_start;
   unlink($phpunit_file);
 
@@ -159,6 +181,8 @@ function process_screening(\Walkthrough\Connection $connection, \ArrayAccess $co
     $path->isFile() ? unlink($path->getPathname()) : rmdir($path->getPathname());
   }
   rmdir($screenshot_dir);
+
+  return $return_value;
 }
 
 /**
