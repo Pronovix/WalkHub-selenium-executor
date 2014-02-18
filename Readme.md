@@ -24,7 +24,7 @@ Test logging in:
     ```
 * Via OAuth
     ```sh
-    $ php wt_selenium.php -w [walkhub url] -k [consumer key] -p [consumer secret] process_queue
+    $ php wt_selenium.php -w [walkhub url] -k [consumer key] -s [consumer secret] process_queue
     Ok.
     ```
 
