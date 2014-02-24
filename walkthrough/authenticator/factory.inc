@@ -31,6 +31,8 @@ class AuthenticatorFactory {
 
     $authenticator = NULL;
 
+    include_once 'walkthrough/authenticator/abstract.inc';
+
     // Basic HTTP authentication.
     if ($settings['username'] && $settings['password']) {
       include_once 'walkthrough/authenticator/basic.inc';
