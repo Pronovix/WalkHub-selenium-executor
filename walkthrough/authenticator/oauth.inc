@@ -2,10 +2,12 @@
 
 namespace Walkthrough\Authenticator;
 
+include_once 'abstract.inc';
+include_once 'oauth/WalkhubOauthPlugin.inc';
+
 use Guzzle\Plugin\Oauth\OauthPlugin;
 use Walkthrough\Authenticator;
-
-include_once 'abstract.inc';
+use Walkthrough\Authenticator\Oauth\WalkhubOauthPlugin;
 
 class Oauth extends WalkthroughAuthenticator {
   protected $consumerKey;
@@ -73,7 +75,7 @@ class Oauth extends WalkthroughAuthenticator {
   public function getClient() {
     $client = parent::getClient();
 
-    $oauth = new OauthPlugin(array(
+    $oauth = new WalkhubOauthPlugin(array(
       'consumer_key' => $this->getConsumerKey(),
       'consumer_secret' => $this->getConsumerSecret(),
     ));
