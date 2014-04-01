@@ -146,9 +146,11 @@ function process_screening(\Walkthrough\Connection $connection, \ArrayAccess $co
     $environment .= $variable . '="' . $setting . '" ';
   }
 
+  $debug_mode = $command_line['debug'] ? '--verbose --debug' : '';
+
   // Execute phpunit.
   $return_value = 0;
-  $command = "$environment ./vendor/bin/phpunit  --bootstrap bootstrap.inc --log-junit $junit_log_file $phpunit_file";
+  $command = "$environment ./vendor/bin/phpunit $debug_mode --bootstrap bootstrap.inc --log-junit $junit_log_file $phpunit_file";
 
   $time_start = microtime(TRUE);
   if ($command_line['debug']) {
