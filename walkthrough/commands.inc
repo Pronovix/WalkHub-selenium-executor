@@ -166,7 +166,7 @@ function process_screening(\Walkthrough\Connection $connection, \ArrayAccess $co
 
   // Post results back.
   format_log($command_line, "Creating empty screening.");
-  $screening_uuid = $connection->createEmptyScreening($walkthrough_to_play['uuid']);
+  $screening_uuid = $connection->createEmptyScreening($walkthrough_to_play);
 
   format_log($command_line, "Uploading screening results.");
   $connection->sendScreeningResult($screening_uuid, array('result' => (($return_value == 0) ? WALKTHROUGH_SELENIUM_RESULT_SUCCESS : WALKTHROUGH_SELENIUM_RESULT_BROKEN)));

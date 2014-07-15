@@ -80,14 +80,24 @@ class Connection {
     )->send()->json();
   }
 
-  public function createEmptyScreening($referenced_walkthrough = NULL) {
+  /**
+   * Creates an empty screening node for a walkthrough.
+   *
+   * @param array $walkthrough
+   *   Walkthrough structure.
+   *   @see \\Walkthrough\Connection::getScreeningQueue()
+   *
+   * @return string
+   *   UUID for the screening.
+   */
+  public function createEmptyScreening($walkthrough) {
     $client = $this->authenticator->getClient();
     $token = $this->getToken($client);
 
-    $post_data = array('title' => 'Automatic screening');
-    if ($referenced_walkthrough) {
-      $post_data += array('referenced_walkthrough' => $referenced_walkthrough);
-    }
+    $post_data = array(
+      'title' => $walkthrough['title'],
+      'referenced_walkthrough' => $walkthrough['uuid'],
+    );
 
     $response = $client->post('walkhub-screening',
       array('X-CSRF-TOKEN' => $token),
