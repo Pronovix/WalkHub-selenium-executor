@@ -146,9 +146,11 @@ function process_screening(\Walkthrough\Connection $connection, \ArrayAccess $co
     $environment .= $variable . '="' . $setting . '" ';
   }
 
+  $debug_mode = $command_line['debug'] ? '--verbose --debug' : '';
+
   // Execute phpunit.
   $return_value = 0;
-  $command = "$environment ./vendor/bin/phpunit  --bootstrap bootstrap.inc --log-junit $junit_log_file $phpunit_file";
+  $command = "$environment ./vendor/bin/phpunit $debug_mode --bootstrap bootstrap.inc --log-junit $junit_log_file $phpunit_file";
 
   $time_start = microtime(TRUE);
   if ($command_line['debug']) {
@@ -164,7 +166,7 @@ function process_screening(\Walkthrough\Connection $connection, \ArrayAccess $co
 
   // Post results back.
   format_log($command_line, "Creating empty screening.");
-  $screening_uuid = $connection->createEmptyScreening($walkthrough_to_play['uuid']);
+  $screening_uuid = $connection->createEmptyScreening($walkthrough_to_play);
 
   format_log($command_line, "Uploading screening results.");
   $connection->sendScreeningResult($screening_uuid, array('result' => (($return_value == 0) ? WALKTHROUGH_SELENIUM_RESULT_SUCCESS : WALKTHROUGH_SELENIUM_RESULT_BROKEN)));
