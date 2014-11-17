@@ -27,7 +27,7 @@ class AuthenticatorFactory {
    * @throws NotAuthenticatedException
    */
   public static function create(\ArrayAccess $settings) {
-    $endpoint = $settings['walkhub_url'] . '/api/v2';
+    $endpoint = $settings['walkhub_url'] . '/api/v2-oauth';
 
     $authenticator = NULL;
 
