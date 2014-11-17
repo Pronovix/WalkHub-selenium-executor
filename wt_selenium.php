@@ -92,7 +92,7 @@ if (function_exists($function_name)) {
     // unauthenticated (We shouldn't...).
     include_once 'walkthrough/authenticator/anonymous.inc';
     $authenticator = new Authenticator\Anonymous();
-    $authenticator->setEndpoint($command_line['walkhub_url'] . '/api/v2');
+    $authenticator->setEndpoint($command_line['walkhub_url'] . '/api/v2-oauth');
   }
 
   // Prepare connection.
